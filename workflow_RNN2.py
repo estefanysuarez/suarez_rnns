@@ -36,7 +36,7 @@ device = torch.device("cpu")
 
 #%% Generate IO data for task
 config = configparser.ConfigParser()
-config.read('params_1.ini')
+config.read('params.ini')
 
 io_kwargs = {'task':config['task_params']['task'],
              'tau':int(config['task_params']['tau']),
@@ -68,7 +68,7 @@ rnn_params = {'input_size':x_train.shape[-1],
               }
 
 # print(f'N. NEURONS : {model_params['hidden_size']}', flush=True)
-model = rnns.NeuralNet(**rnn_params)                 
+model = rnns.NeuralNet(**rnn_params)
 model.to(device)
 
 # %% define Loss, Optimizer, and model Hyper-parameters
@@ -90,7 +90,7 @@ train_loss = []
 avg_LE = []
 std_LE = []
 
-status = True 
+status = True
 print ('\nINITIATING PROCESSING TIME', flush=True)
 t0 = time.perf_counter()
 
@@ -107,19 +107,19 @@ for epoch in range(1, n_epochs + 1):
                                 warmup=0,
                                 T_ons=1
                                 )
-    
+
     # print(f'\n\t\tProcessing time for LEs: {time.perf_counter()-tic:0.4f}', flush=True)
 
     stats_LE = torch.std_mean(LE, axis=0)
     std_LE.append(stats_LE[0])
     avg_LE.append(stats_LE[1])
-    
-    # Train RNN 
+
+    # Train RNN
     # print('\n\tTraining RNN ...', flush=True)
     # tic = time.perf_counter()
 
     # Clear existing gradients from previous epoch
-    optimizer.zero_grad() 
+    optimizer.zero_grad()
 
     # Forward pass
     output, hidden = model(x_train)
@@ -130,7 +130,7 @@ for epoch in range(1, n_epochs + 1):
     loss.backward() # Does backpropagation and calculates gradients
 
     optimizer.step() # Updates the weights accordingly
-    if epoch > start_decay: scheduler.step() # Updates the learning rate    
+    if epoch > start_decay: scheduler.step() # Updates the learning rate
 
     # print(f'\t\tProcessing time for training: {time.perf_counter()-tic:0.4f}', flush=True)
 
@@ -160,7 +160,7 @@ for epoch in range(1, n_epochs + 1):
     if test_loss[epoch-1] < test_loss[epoch-2]:
         status = False
         break
-    
+
     if epoch%10 == 0:
         print('\nEpoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
         print("Loss: {:.4f}".format(loss.item()))
@@ -179,5 +179,3 @@ print(f'{time.perf_counter() - t0:0.4f} seconds')
 
 # avg_LE = np.vstack(avg_LE)
 # std_LE = np.vstack(std_LE)
-
-
